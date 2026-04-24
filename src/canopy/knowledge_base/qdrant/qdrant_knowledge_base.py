@@ -313,25 +313,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
                                 )]
             >>> results = await kb.aquery(queries)
         """  # noqa: E501
-        # TODO: Use aencode_queries() when implemented for the defaults
-        queries = self._encoder.encode_queries(queries)
-        results = [
-            await self._aquery_collection(q, global_metadata_filter) for q in queries
-        ]
-        results = self._reranker.rerank(results)
-
-        return [
-            QueryResult(
-                query=r.query,
-                documents=[
-                    DocumentWithScore(
-                        **d.dict(exclude={"values", "sparse_values", "document_id"})
-                    )
-                    for d in r.documents
-                ],
-            )
-            for r in results
-        ]
+        pass
 
     def upsert(
         self,
@@ -372,20 +354,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
                                      metadata={"website": "wiki"})]
             >>> kb.upsert(documents)
         """  # noqa: E501
-        for doc in documents:
-            metadata_keys = set(doc.metadata.keys())
-            forbidden_keys = metadata_keys.intersection(RESERVED_METADATA_KEYS)
-            if forbidden_keys:
-                raise ValueError(
-                    f"Document with id {doc.id} contains reserved metadata keys: "
-                    f"{forbidden_keys}. Please remove them and try again."
-                )
-
-        # TODO: Use achunk_documents, encode_documents when implemented for the defaults
-        chunks = self._chunker.chunk_documents(documents)
-        encoded_chunks = self._encoder.encode_documents(chunks)
-
-        self._upsert_collection(encoded_chunks, batch_size, show_progress_bar)
+        pass
 
     @sync_fallback
     async def aupsert(
@@ -427,19 +396,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
                                      metadata={"website": "wiki"})]
             >>> await kb.aupsert(documents)
         """  # noqa: E501
-        for doc in documents:
-            metadata_keys = set(doc.metadata.keys())
-            forbidden_keys = metadata_keys.intersection(RESERVED_METADATA_KEYS)
-            if forbidden_keys:
-                raise ValueError(
-                    f"Document with id {doc.id} contains reserved metadata keys: "
-                    f"{forbidden_keys}. Please remove them and try again."
-                )
-
-        chunks = self._chunker.chunk_documents(documents)
-        encoded_chunks = self._encoder.encode_documents(chunks)
-
-        await self._aupsert_collection(encoded_chunks, batch_size, show_progress_bar)
+        pass
 
     def delete(self, document_ids: List[str], namespace: str = "") -> None:
         """
@@ -459,16 +416,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
             >>> kb = QdrantKnowledgeBase(collection_name="my_collection")
             >>> kb.delete(document_ids=["doc1", "doc2"])
         """  # noqa: E501
-        self._client.delete(
-            self.collection_name,
-            points_selector=models.Filter(
-                must=[
-                    models.FieldCondition(
-                        key="document_id", match=models.MatchAny(any=document_ids)
-                    )
-                ]
-            ),
-        )
+        pass
 
     @sync_fallback
     async def adelete(self, document_ids: List[str], namespace: str = "") -> None:
@@ -489,17 +437,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
             >>> kb = QdrantKnowledgeBase(collection_name="my_collection")
             >>> await kb.adelete(document_ids=["doc1", "doc2"])
         """  # noqa: E501
-        # @sync_fallback will call the sync method if the async client is None
-        self._async_client and await self._async_client.delete(
-            self.collection_name,
-            points_selector=models.Filter(
-                must=[
-                    models.FieldCondition(
-                        key="document_id", match=models.MatchAny(any=document_ids)
-                    )
-                ]
-            ),
-        )
+        pass
 
     def create_canopy_collection(
         self,
@@ -533,74 +471,20 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
                     Reference: https://qdrant.tech/documentation/concepts/collections/#create-a-collection
 
         """  # noqa: E501
-        if dimension is None:
-            try:
-                encoder_dimension = self._encoder.dimension
-                if encoder_dimension is None:
-                    raise RuntimeError(
-                        f"The selected encoder {self._encoder.__class__.__name__} does "
-                        f"not support inferring the vectors' dimensionality."
-                    )
-                dimension = encoder_dimension
-            except Exception as e:
-                raise RuntimeError(
-                    f"Canopy has failed to infer vectors' dimensionality using the "
-                    f"selected encoder: {self._encoder.__class__.__name__}. You can "
-                    f"provide the dimension manually, try using a different encoder, or"
-                    f" fix the underlying error:\n{e}"
-                ) from e
-
-        try:
-            self._client.get_collection(self.collection_name)
-
-            raise RuntimeError(
-                f"Collection {self.collection_name} already exists!"
-                "To delete it call `knowledge_base.delete_canopy_collection()`. "
-            )
-
-        except (UnexpectedResponse, RpcError, ValueError):
-            self._client.create_collection(
-                collection_name=self.collection_name,
-                vectors_config={
-                    DENSE_VECTOR_NAME: models.VectorParams(
-                        size=dimension, distance=distance, on_disk=vectors_on_disk
-                    )
-                },
-                sparse_vectors_config={
-                    SPARSE_VECTOR_NAME: models.SparseVectorParams(
-                        index=models.SparseIndexParams(
-                            on_disk=vectors_on_disk,
-                        )
-                    )
-                },
-                **kwargs,
-            )
-
-            for field in indexed_keyword_fields:
-                self._client.create_payload_index(
-                    self.collection_name, field_name=field, field_schema="keyword"
-                )
+        pass
 
     def list_canopy_collections(self) -> List[str]:
-        collections = [
-            collection.name
-            for collection in self._client.get_collections().collections
-            if collection.name.startswith(COLLECTION_NAME_PREFIX)
-        ]
-        return collections
+        pass
 
     def delete_canopy_collection(self):
-        successful = self._client.delete_collection(self.collection_name)
-
-        if not successful:
-            raise RuntimeError(f"Failed to delete collection {self.collection_name}")
+        pass
 
     @property
     def collection_name(self) -> str:
         """
         The name of the collection the knowledge base is connected to.
         """
-        return self._collection_name
+        pass
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "QdrantKnowledgeBase":
@@ -621,10 +505,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
 
     @staticmethod
     def _get_full_collection_name(collection_name: str) -> str:
-        if collection_name.startswith(COLLECTION_NAME_PREFIX):
-            return collection_name
-        else:
-            return COLLECTION_NAME_PREFIX + collection_name
+        pass
 
     def _query_collection(
         self, query: KBQuery, global_metadata_filter: Optional[dict]
@@ -658,35 +539,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
     async def _aquery_collection(
         self, query: KBQuery, global_metadata_filter: Optional[dict]
     ) -> KBQueryResult:
-        metadata_filter = deepcopy(query.metadata_filter)
-        if global_metadata_filter is not None:
-            if metadata_filter is None:
-                metadata_filter = {}
-            metadata_filter.update(global_metadata_filter)
-        top_k = query.top_k if query.top_k else self._default_top_k
-
-        query_params = deepcopy(query.query_params)
-
-        # Use dense vector if available, otherwise use sparse vector
-        query_vector = QdrantConverter.kb_query_to_search_vector(query)
-
-        # @sync_fallback will call the sync method if the async client is None
-        results = (
-            await self._async_client.search(
-                self.collection_name,
-                query_vector=query_vector,
-                limit=top_k,
-                query_filter=metadata_filter,
-                with_payload=True,
-                **query_params,
-            )
-            if self._async_client
-            else []
-        )
-        documents: List[KBDocChunkWithScore] = []
-        for result in results:
-            documents.append(QdrantConverter.scored_point_to_scored_doc(result))
-        return KBQueryResult(query=query.text, documents=documents)
+        pass
 
     def _upsert_collection(
         self,
@@ -694,21 +547,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
         batch_size: int,
         show_progress_bar: bool,
     ) -> None:
-        batched_documents = batched(encoded_chunks, batch_size)
-        with tqdm(
-            total=len(encoded_chunks), disable=not show_progress_bar
-        ) as progress_bar:
-            for document_batch in batched_documents:
-                batch = QdrantConverter.encoded_docs_to_points(
-                    document_batch,
-                )
-
-                self._client.upsert(
-                    collection_name=self.collection_name,
-                    points=batch,
-                )
-
-                progress_bar.update(batch_size)
+        pass
 
     async def _aupsert_collection(
         self,
@@ -716,24 +555,7 @@ class QdrantKnowledgeBase(BaseKnowledgeBase):
         batch_size: int,
         show_progress_bar: bool,
     ) -> None:
-        batched_documents = batched(encoded_chunks, batch_size)
-        with tqdm(
-            total=len(encoded_chunks), disable=not show_progress_bar
-        ) as progress_bar:
-            for document_batch in batched_documents:
-                batch = QdrantConverter.encoded_docs_to_points(
-                    document_batch,
-                )
-
-                # @sync_fallback will call the sync method if the async client is None
-                self._async_client and await self._async_client.upsert(
-                    collection_name=self.collection_name,
-                    points=batch,
-                )
-
-                progress_bar.update(batch_size)
+        pass
 
     async def close(self) -> None:
-        self._client.close()
-        if self._async_client:
-            await self._async_client.close()
+        pass

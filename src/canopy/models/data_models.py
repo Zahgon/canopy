@@ -47,13 +47,7 @@ class Document(BaseModel):
     @field_validator("metadata")
     @classmethod
     def metadata_reseved_fields(cls, v):
-        if "text" in v:
-            raise ValueError('Metadata cannot contain reserved field "text"')
-        if "document_id" in v:
-            raise ValueError('Metadata cannot contain reserved field "document_id"')
-        if "source" in v:
-            raise ValueError('Metadata cannot contain reserved field "source"')
-        return v
+        pass
 
 
 class ContextContent(RootModel, ABC):

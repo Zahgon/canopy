@@ -50,14 +50,7 @@ class RecursiveCharacterChunker(Chunker):
             chunks: list of chunks KBDocChunks from the document, where text is splitted
                               evenly using the RecursiveCharacterTextSplitter
         """  # noqa: E501
-        # TODO: check overlap not bigger than max_chunk_size
-        text_chunks = self._chunker.split_text(document.text)
-        return [KBDocChunk(id=self.generate_chunk_id(document.id, i),
-                           document_id=document.id,
-                           text=text_chunk,
-                           source=document.source,
-                           metadata=deepcopy(document.metadata))
-                for i, text_chunk in enumerate(text_chunks)]
+        pass
 
     async def achunk_single_document(self, document: Document) -> List[KBDocChunk]:
         raise NotImplementedError()

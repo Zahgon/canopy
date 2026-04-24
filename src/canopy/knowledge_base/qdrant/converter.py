@@ -37,32 +37,7 @@ class QdrantConverter:
     def encoded_docs_to_points(
         encoded_docs: List[KBEncodedDocChunk],
     ) -> "List[models.PointStruct]":
-        points = []
-        for doc in encoded_docs:
-            record = doc.to_db_record()
-            _id: str = record.pop("id")
-            dense_vector: VectorValues = record.pop("values", None)
-            sparse_vector: SparseVector = record.pop("sparse_values", None)
-
-            vector: Dict[str, models.Vector] = {}
-
-            if dense_vector:
-                vector[DENSE_VECTOR_NAME] = dense_vector
-
-            if sparse_vector:
-                vector[SPARSE_VECTOR_NAME] = models.SparseVector(
-                    indices=sparse_vector["indices"],
-                    values=sparse_vector["values"],
-                )
-
-            points.append(
-                models.PointStruct(
-                    id=QdrantConverter.convert_id(_id),
-                    vector=vector,
-                    payload={**record["metadata"], "chunk_id": _id},
-                )
-            )
-        return points
+        pass
 
     @staticmethod
     def scored_point_to_scored_doc(

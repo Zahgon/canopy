@@ -78,7 +78,7 @@ class LlamaTokenizer(BaseTokenizer):
         Returns:
             The detokenized text as a string.
         """
-        return self._encoder.convert_tokens_to_string(tokens)
+        pass
 
     def token_count(self, text: str) -> int:
         """

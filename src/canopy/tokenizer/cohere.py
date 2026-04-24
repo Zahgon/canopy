@@ -73,11 +73,7 @@ class CohereHFTokenizer(BaseTokenizer):
         Returns:
             The detokenized text as a string.
         """
-        if not isinstance(tokens, List):
-            raise TypeError(f"detokenize expect List[str], got f{type(tokens)}")
-
-        ids = [self._encoder.token_to_id(token) for token in tokens]
-        return self._encoder.decode(ids)
+        pass
 
     def token_count(self, text: str) -> int:
         """
@@ -172,9 +168,7 @@ class CohereAPITokenizer(BaseTokenizer):
         Returns:
             The detokenized text as a string.
         """
-        if not isinstance(tokens, List):
-            raise TypeError(f"detokenize expects List[str], got f{type(tokens)}")
-        return "".join(tokens)
+        pass
 
     def messages_token_count(self, messages: Messages) -> int:
         """

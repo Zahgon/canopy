@@ -71,7 +71,7 @@ class OpenAILLM(BaseLLM):
 
     @property
     def available_models(self):
-        return [k.id for k in self._client.models.list()]
+        pass
 
     def chat_completion(self,
                         system_prompt: str,

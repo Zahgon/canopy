@@ -76,13 +76,7 @@ class HybridRecordEncoder(RecordEncoder):
 
     @cached_property
     def _sparse_encoder(self) -> BM25Encoder:
-        logger.info("Loading the document frequencies for the BM25Encoder...")
-        if self._bm_25_encoder_df_path is None:
-            encoder = BM25Encoder.default()
-        else:
-            encoder = BM25Encoder().load(self._bm_25_encoder_df_path)
-        logger.info("Finished loading the document frequencies for the BM25Encoder.")
-        return encoder
+        pass
 
     def _encode_documents_batch(self,
                                 documents: List[KBDocChunk]
@@ -97,14 +91,7 @@ class HybridRecordEncoder(RecordEncoder):
             with the `values` containing the generated dense vector and
             `sparse_values` containing the generated sparse vector.
         """  # noqa: E501
-
-        chunks = self._dense_record_encoder.encode_documents(documents)
-        sparse_values = self._sparse_encoder.encode_documents(
-            [d.text for d in documents]
-        )
-        for chunk, sv in zip(chunks, sparse_values):
-            chunk.sparse_values = sv
-        return chunks
+        pass
 
     def _encode_queries_batch(self, queries: List[Query]) -> List[KBQuery]:
         """
@@ -129,7 +116,7 @@ class HybridRecordEncoder(RecordEncoder):
 
     @property
     def dimension(self) -> int:
-        return self._dense_record_encoder.dimension
+        pass
 
     async def _aencode_documents_batch(self,
                                        documents: List[KBDocChunk]

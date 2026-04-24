@@ -27,16 +27,10 @@ class Chunker(ABC, ConfigurableMixin):
         Returns:
             chunks: list of chunks of type KBDocChunks
         """
-        chunks: List[KBDocChunk] = []
-        for doc in documents:
-            chunks.extend(self.chunk_single_document(doc))
-        return chunks
+        pass
 
     async def achunk_documents(self, documents: List[Document]) -> List[KBDocChunk]:
-        chunks: List[KBDocChunk] = []
-        for doc in documents:
-            chunks.extend(await self.achunk_single_document(doc))
-        return chunks
+        pass
 
     @abstractmethod
     def chunk_single_document(self, document: Document) -> List[KBDocChunk]:
@@ -58,4 +52,4 @@ class Chunker(ABC, ConfigurableMixin):
         raise NotImplementedError()
 
     def generate_chunk_id(self, document_id: str, chunk_index: int) -> str:
-        return f"{document_id}_{chunk_index}"
+        pass

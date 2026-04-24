@@ -57,7 +57,7 @@ class OctoAIRecordEncoder(DenseRecordEncoder):
         Returns:
             encoded chunks: A list of KBEncodedDocChunk, with the `values` field populated by the generated embeddings vector.
         """  # noqa: E501
-        return super().encode_documents(documents)
+        pass
 
     async def _aencode_documents_batch(self,
                                        documents: List[KBDocChunk]

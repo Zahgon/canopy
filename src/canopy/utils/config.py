@@ -80,12 +80,7 @@ class ConfigurableMixin:
 
     @classmethod
     def list_supported_types(cls):
-        if cls is not cls.__FACTORY_BASE_CLASS__:
-            raise RuntimeError(
-                f"{cls.__name__} list_supported_types() should only be called on the "
-                f"base class."
-            )
-        return list(cls._SUPPORTED_CLASSES.keys())
+        pass
 
     @classmethod
     def _load_sub_components(cls, config):

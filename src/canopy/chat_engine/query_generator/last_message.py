@@ -33,4 +33,4 @@ class LastMessageQueryGenerator(QueryGenerator):
     async def agenerate(self,
                         messages: Messages,
                         max_prompt_tokens: int) -> List[Query]:
-        return self.generate(messages, max_prompt_tokens)
+        pass

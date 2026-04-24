@@ -90,17 +90,7 @@ class RecordEncoder(ABC, ConfigurableMixin):
             encoded chunks: A list of KBEncodedDocChunk.
 
         """  # noqa: E501
-        encoded_docs = []
-        for batch in self._batch_iterator(documents, self.batch_size):
-            try:
-                encoded_docs.extend(self._encode_documents_batch(batch))
-            except Exception as e:
-                raise RuntimeError(
-                    f"Failed to enconde documents using {self.__class__.__name__}. "
-                    f"Error: {self._format_error(e)}"
-                ) from e
-
-        return encoded_docs  # TODO: consider yielding a generator
+        pass
 
     def encode_queries(self, queries: List[Query]) -> List[KBQuery]:
         """
@@ -129,18 +119,10 @@ class RecordEncoder(ABC, ConfigurableMixin):
     async def aencode_documents(self,
                                 documents: List[KBDocChunk]
                                 ) -> List[KBEncodedDocChunk]:
-        encoded_docs = []
-        for batch in self._batch_iterator(documents, self.batch_size):
-            encoded_docs.extend(await self._aencode_documents_batch(batch))
-
-        return encoded_docs
+        pass
 
     async def aencode_queries(self, queries: List[Query]) -> List[KBQuery]:
-        kb_queries = []
-        for batch in self._batch_iterator(queries, self.batch_size):
-            kb_queries.extend(await self._aencode_queries_batch(batch))
-
-        return kb_queries
+        pass
 
     def _format_error(self, err):
         return f"{err}"
@@ -151,4 +133,4 @@ class RecordEncoder(ABC, ConfigurableMixin):
         Returns:
             The dimension of the dense vectors produced by the encoder, if applicable.
         """  # noqa: E501
-        return None
+        pass

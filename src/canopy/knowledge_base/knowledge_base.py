@@ -217,10 +217,7 @@ class KnowledgeBase(BaseKnowledgeBase):
 
     @property
     def _connection_error_msg(self) -> str:
-        return (
-            f"KnowledgeBase is not connected to index {self.index_name}, "
-            f"Please call knowledge_base.connect(). "
-        )
+        pass
 
     def connect(self) -> None:
         """
@@ -287,93 +284,24 @@ class KnowledgeBase(BaseKnowledgeBase):
                    default is 'cosine'.
 
         """  # noqa: E501
-
-        if spec is None:
-            spec = ServerlessSpec(
-                cloud="aws",
-                region="us-west-2"
-            )
-
-        try:
-            encoder_dimension = self._encoder.dimension
-            if encoder_dimension is None:
-                raise RuntimeError(
-                    f"The selected encoder {self._encoder.__class__.__name__} does "
-                    f"not support inferring the vectors' dimensionality."
-                )
-            dimension = encoder_dimension
-        except Exception as e:
-            raise RuntimeError(
-                f"Canopy has failed to infer vectors' dimensionality using the "
-                f"selected encoder: {self._encoder.__class__.__name__}. You can "
-                f"provide the dimension manually, try using a different encoder, or"
-                f" fix the underlying error:\n{e}"
-            ) from e
-
-        if self.index_name in list_canopy_indexes(self._pinecone_client):
-            raise RuntimeError(
-                f"Index {self.index_name} already exists. To connect to an "
-                f"existing index, use `knowledge_base.connect()`. "
-                "If you wish to delete it call `knowledge_base.delete_index()`. "
-            )
-
-        self._validate_metric(metric)
-
-        try:
-            self._pinecone_client.create_index(
-                name=self.index_name,
-                dimension=dimension,
-                spec=spec,
-                timeout=TIMEOUT_INDEX_CREATE,
-                metric=metric)
-        except (Exception, PineconeApiException) as e:
-            raise RuntimeError(
-                f"Failed to create index {self.index_name} due to error: "
-                f"{e.body if isinstance(e, PineconeApiException) else e}"
-            ) from e
-
-        # wait for index to be provisioned
-        self._wait_for_index_provision()
+        pass
 
     def _wait_for_index_provision(self):
-        start_time = time.time()
-        while True:
-            try:
-                self._connect_index()
-                break
-            except RuntimeError:
-                pass
-
-            time_passed = time.time() - start_time
-            if time_passed > TIMEOUT_INDEX_PROVISION:
-                raise RuntimeError(
-                    f"Index {self.index_name} failed to provision "
-                    f"for {time_passed} seconds."
-                    f"Please try creating KnowledgeBase again in a few minutes."
-                )
-            time.sleep(INDEX_PROVISION_TIME_INTERVAL)
+        pass
 
     def _validate_metric(self, metric: Optional[str]):
-        if isinstance(self._encoder, HybridRecordEncoder):
-            if metric != "dotproduct":
-                raise RuntimeError(
-                    "HybridRecordEncoder only supports dotproduct metric. "
-                    "Please set metric='dotproduct' on index creation."
-                )
+        pass
 
     @staticmethod
     def _get_full_index_name(index_name: str) -> str:
-        if index_name.startswith(INDEX_NAME_PREFIX):
-            return index_name
-        else:
-            return INDEX_NAME_PREFIX + index_name
+        pass
 
     @property
     def index_name(self) -> str:
         """
         The name of the index the knowledge base is connected to.
         """
-        return self._index_name
+        pass
 
     def delete_index(self):
         """
@@ -387,10 +315,7 @@ class KnowledgeBase(BaseKnowledgeBase):
                          If you'd wish to re-create an index with the same name, simply call `knowledge_base.create_canopy_index()`
                          Or use the CLI command `canopy new`.
         """  # noqa: E501
-        if self._index is None:
-            raise RuntimeError(self._connection_error_msg)
-        self._pinecone_client.delete_index(self._index_name)
-        self._index = None
+        pass
 
     def query(self,
               queries: List[Query],
@@ -546,36 +471,7 @@ class KnowledgeBase(BaseKnowledgeBase):
                                      metadata={"website": "wiki"})]
             >>> kb.upsert(documents)
         """  # noqa: E501
-        if self._index is None:
-            raise RuntimeError(self._connection_error_msg)
-
-        for doc in documents:
-            metadata_keys = set(doc.metadata.keys())
-            forbidden_keys = metadata_keys.intersection(RESERVED_METADATA_KEYS)
-            if forbidden_keys:
-                raise ValueError(
-                    f"Document with id {doc.id} contains reserved metadata keys: "
-                    f"{forbidden_keys}. Please remove them and try again."
-                )
-
-        chunks = self._chunker.chunk_documents(documents)
-        encoded_chunks = self._encoder.encode_documents(chunks)
-
-        # The upsert operation may update documents which may already exist
-        # int the index, as many individual chunks.
-        # As the process of chunking might have changed
-        # the number of chunks per document,
-        # we need to delete all existing chunks
-        # belonging to the same documents before upserting the new ones.
-        # we currently don't delete documents before upsert in starter env
-        if not self._is_serverless_env():
-            self.delete(document_ids=[doc.id for doc in documents],
-                        namespace=namespace)
-
-        self._index.upsert(
-            [c.to_db_record() for c in encoded_chunks],
-            namespace=namespace, batch_size=batch_size,
-            show_progress=show_progress_bar)
+        pass
 
     def delete(self,
                document_ids: List[str],
@@ -600,30 +496,7 @@ class KnowledgeBase(BaseKnowledgeBase):
             >>> kb.connect()
             >>> kb.delete(document_ids=["doc1", "doc2"])
         """  # noqa: E501
-        if self._index is None:
-            raise RuntimeError(self._connection_error_msg)
-
-        # Currently starter env does not support delete by metadata filter
-        # So temporarily we delete the first DELETE_STARTER_CHUNKS_PER_DOC chunks
-        if self._is_serverless_env():
-            for i in range(0, len(document_ids), DELETE_STARTER_BATCH_SIZE):
-                doc_ids_chunk = document_ids[i:i + DELETE_STARTER_BATCH_SIZE]
-                chunked_ids = [f"{doc_id}_{i}"
-                               for doc_id in doc_ids_chunk
-                               for i in range(DELETE_STARTER_CHUNKS_PER_DOC)]
-                try:
-                    self._index.delete(ids=chunked_ids,
-                                       namespace=namespace)
-                except Exception as e:
-                    raise RuntimeError(
-                        f"Failed to delete document ids: {document_ids[i:]}"
-                        f"Please try again."
-                    ) from e
-        else:
-            self._index.delete(
-                filter={"document_id": {"$in": document_ids}},
-                namespace=namespace
-            )
+        pass
 
     @classmethod
     def from_config(cls,
@@ -665,9 +538,7 @@ class KnowledgeBase(BaseKnowledgeBase):
 
     @lru_cache(maxsize=1)
     def _is_serverless_env(self):
-        description = self._pinecone_client.describe_index(self.index_name)
-        return ("serverless" in description["spec"] or
-                description["spec"].get("pod", {}).get("environment") == "gcp-starter")
+        pass
 
     async def aquery(self,
                      queries: List[Query],

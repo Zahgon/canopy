@@ -61,16 +61,4 @@ class FunctionCallingQueryGenerator(QueryGenerator):
 
     @property
     def _function(self) -> Function:
-        return Function(
-            name="query_knowledgebase",
-            description=self._function_description,
-            parameters=FunctionParameters(
-                required_properties=[
-                    FunctionArrayProperty(
-                        name="queries",
-                        items_type="string",
-                        description='List of queries to send to the search engine.',
-                    ),
-                ]
-            ),
-        )
+        pass

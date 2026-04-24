@@ -16,21 +16,7 @@ logger = logging.getLogger(__name__)
 def sync_fallback(method: Callable) -> Callable:
     @functools.wraps(method)
     async def wrapper(self, *args, **kwargs):
-        if self._async_client is None or isinstance(
-            self._async_client._client, AsyncQdrantLocal
-        ):
-            sync_method_name = method.__name__[1:]
-
-            logger.warning(
-                f"{method.__name__}() cannot be used for QdrantLocal. "
-                f"Falling back to {sync_method_name}()"
-            )
-            loop = asyncio.get_event_loop()
-
-            call = functools.partial(getattr(self, sync_method_name), *args, **kwargs)
-            return await loop.run_in_executor(None, call)
-        else:
-            return await method(self, *args, **kwargs)
+        pass
 
     return wrapper
 

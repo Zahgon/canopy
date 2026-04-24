@@ -55,26 +55,7 @@ class TokenChunker(Chunker):
         Returns:
             text_chunks: list of chunks KBDocChunks from the document
         """  # noqa: E501
-        tokens = self._tokenizer.tokenize(document.text)
-        token_chunks = [tokens[i:i + self._chunk_size]
-                        for i in range(0, len(tokens),
-                                       self._chunk_size - self._overlap)]
-
-        if len(token_chunks) == 0:
-            return []
-
-        # remove last chunk if it is smaller than overlap
-        if len(token_chunks[-1]) <= self._overlap and len(token_chunks) > 1:
-            token_chunks = token_chunks[:-1]
-
-        text_chunks = [self._tokenizer.detokenize(chunk)
-                       for chunk in token_chunks]
-        return [KBDocChunk(id=self.generate_chunk_id(document.id, i),
-                           document_id=document.id,
-                           text=text_chunk,
-                           source=document.source,
-                           metadata=document.metadata)
-                for i, text_chunk in enumerate(text_chunks)]
+        pass
 
     async def achunk_single_document(self, document: Document) -> List[KBDocChunk]:
         raise NotImplementedError()

@@ -23,4 +23,4 @@ class TransparentReranker(Reranker):
         return results
 
     async def arerank(self, results: List[KBQueryResult]) -> List[KBQueryResult]:
-        return results
+        pass

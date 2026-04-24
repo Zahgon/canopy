@@ -135,7 +135,7 @@ class Tokenizer:
         Returns:
             The joined text as a string.
         """  # noqa: E501
-        return self._tokenizer_instance.detokenize(tokens)   # type: ignore[union-attr]
+        pass
 
     def token_count(self, text: str) -> int:
         """

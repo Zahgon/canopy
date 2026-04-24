@@ -24,22 +24,7 @@ class KBEncodedDocChunk(KBDocChunk):
     sparse_values: Optional[SparseVector] = None
 
     def to_db_record(self):
-        metadata = deepcopy(self.metadata)
-        metadata["text"] = self.text
-        metadata["document_id"] = self.document_id
-        metadata["source"] = self.source
-
-        record = {
-            "id": self.id,
-            "values": self.values,
-            "metadata": metadata,
-
-        }
-
-        if self.sparse_values is not None and len(self.sparse_values["values"]) > 0:
-            record["sparse_values"] = self.sparse_values
-
-        return record
+        pass
 
 
 class KBQuery(Query):

@@ -34,14 +34,7 @@ class FunctionParameters(BaseModel):
 
     @model_serializer()
     def serialize_model(self):
-        return {
-            "type": "object",
-            "properties": {
-                pro.name: pro.model_dump(exclude_none=True, exclude={"name"})
-                for pro in self.required_properties + self.optional_properties
-            },
-            "required": [pro.name for pro in self.required_properties],
-        }
+        pass
 
 
 class Function(BaseModel):

@@ -39,9 +39,7 @@ class DenseRecordEncoder(RecordEncoder):
         Returns:
             encoded chunks: A list of KBEncodedDocChunk, with the `values` field populated by the generated embeddings vector.
         """  # noqa: E501
-        dense_values = self._dense_encoder.encode_documents([d.text for d in documents])
-        return [KBEncodedDocChunk(**d.model_dump(), values=v) for d, v in
-                zip(documents, dense_values)]
+        pass
 
     def _encode_queries_batch(self, queries: List[Query]) -> List[KBQuery]:
         """
@@ -64,7 +62,7 @@ class DenseRecordEncoder(RecordEncoder):
         Returns:
             dimension(int): the dimension of the encoder
         """  # noqa: E501
-        return self._dense_encoder.dimension
+        pass
 
     async def _aencode_documents_batch(self,
                                        documents: List[KBDocChunk]

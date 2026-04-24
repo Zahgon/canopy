@@ -57,9 +57,7 @@ class OpenAITokenizer(BaseTokenizer):
         Returns:
             The detokenized text as a string.
         """
-        if not isinstance(tokens, List):
-            raise TypeError(f"detokenize expect List[str], got f{type(tokens)}")
-        return "".join(tokens)
+        pass
 
     def token_count(self, text: str) -> int:
         """
